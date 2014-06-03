@@ -1,68 +1,74 @@
 /**
- * Copyright (C) 2012 Chris Wharton (chris@weare2ndfloor.com)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * THIS SOFTWARE AND DOCUMENTATION IS PROVIDED "AS IS," AND COPYRIGHT
- * HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY OR
- * FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SOFTWARE
- * OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY PATENTS,
- * COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.COPYRIGHT HOLDERS WILL NOT
- * BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR CONSEQUENTIAL
- * DAMAGES ARISING OUT OF ANY USE OF THE SOFTWARE OR DOCUMENTATION.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://gnu.org/licenses/>.
- 
- Documentation available at http://cookiecuttr.com
- 
- */
+* Copyright (C) 2012 Chris Wharton (chris@weare2ndfloor.com)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* THIS SOFTWARE AND DOCUMENTATION IS PROVIDED "AS IS," AND COPYRIGHT
+* HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED,
+* INCLUDING BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY OR
+* FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SOFTWARE
+* OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY PATENTS,
+* COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.COPYRIGHT HOLDERS WILL NOT
+* BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR CONSEQUENTIAL
+* DAMAGES ARISING OUT OF ANY USE OF THE SOFTWARE OR DOCUMENTATION.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://gnu.org/licenses/>.
+Documentation available at http://cookiecuttr.com
+*/
 (function ($) {
     $.cookieCuttr = function (options) {
         var defaults = {
             cookieCutter: false, // you'd like to enable the div/section/span etc. hide feature? change this to true
             cookieCutterDeclineOnly: false, // you'd like the CookieCutter to only hide when someone has clicked declined set this to true
-            cookieAnalytics: true, // just using a simple analytics package? change this to true
-            cookieDeclineButton: false, // this will disable non essential cookies
-            cookieAcceptButton: true, // this will disable non essential cookies
+            cookieAnalytics: false, // just using a simple analytics package? change this to true
+            cookieDeclineButtons: true, // this will disable non essential cookies
+            cookieAcceptButton: false, // this will disable non essential cookies
             cookieResetButton: false,
             cookieOverlayEnabled: false, // don't want a discreet toolbar? Fine, set this to true
-            cookiePolicyLink: '/privacy-policy/', // if applicable, enter the link to your privacy policy here...
-            cookieMessage: 'We use cookies on this website, you can <a href="{{cookiePolicyLink}}" title="read about our cookies">read about them here</a>. To use the website as intended please...',
-            cookieAnalyticsMessage: 'We use cookies, just to track visits to our website, we store no personal details.',
+            cookiePolicyLink: '/privacy-policy', // if applicable, enter the link to your privacy policy here...
+			cookieMessage : "Ce site web utilise des cookies, en savoir plus <a id='learn_more' class='learn_more' href=\"{{cookiePolicyLink}}\" title=\"En savoir plus\">cliquer ici</a>",
+			cookieGenMessage : "Ce site web utilise des cookies, pour des finalités de {{cookieFinalitéesListe}} en savoir plus <a id='learn_more' class='learn_more' href=\"{{cookiePolicyLink}}\" title=\"En savoir plus\">cliquer ici</a>",
+            cookieSocialMessage: "Ce site web utilise des cookies pour fournire des fonctionalité de partage sur les réseau socieaux, si vous souhaite en savoir plus <a id='learn_more' class='learn_more' href=\"{{cookiePolicyLink}}\" title=\"En savoir plus\">cliquer ici</a>",
+            cookieAnalyticsMessage: "Nous utilisons des cookies pour des fonctionalité de mesure d'audience, si vous souhaite en savoir plus <a id='learn_more' class='learn_more' href=\"{{cookiePolicyLink}}\" title=\"En savoir plus\">cliquer ici</a>.",
             cookieErrorMessage: "We\'re sorry, this feature places cookies in your browser and has been disabled. <br>To continue using this functionality, please",
             cookieWhatAreTheyLink: "http://www.allaboutcookies.org/",
             cookieDisable: '',
             cookieExpires: 365,
+			cookieFinalitees: ["analytics","social","advertisement"],
+			cookieTexts: {"analytics":"mesure d'audience","social":"réseaux socieaux","advertisement":"publicité"},
+			cookieButtons: {"analytics":{"accept": "Accepter analytics","decline":"Refuser analytics","text":"mesure d'audience","status":"accept"},"social":{"accept": "Accepter social","decline":"Refuser social","text":"réseaux socieaux","status":"accept"},"advertisement":{"accept":"Accepter pub","decline":"Refuser pub","text":"publicité","status":"accept"}},
             cookieAcceptButtonText: "ACCEPT COOKIES",
             cookieDeclineButtonText: "DECLINE COOKIES",
             cookieResetButtonText: "RESET COOKIES FOR THIS WEBSITE",
             cookieWhatAreLinkText: "What are cookies?",
-            cookieNotificationLocationBottom: false, // top or bottom - they are your only options, so true for bottom, false for top            
+            cookieNotificationLocationBottom: true, // top or bottom - they are your only options, so true for bottom, false for top
             cookiePolicyPage: false,
             cookiePolicyPageMessage: 'Please read the information below and then choose from the following options',
             cookieDiscreetLink: false,
-            cookieDiscreetReset: false,
+            cookieDiscreetReset: true,
             cookieDiscreetLinkText: "Cookies?",
-            cookieDiscreetPosition: "topleft", //options: topleft, topright, bottomleft, bottomright         
+            cookieDiscreetPosition: "topleft", //options: topleft, topright, bottomleft, bottomright
             cookieNoMessage: false, // change to true hide message from all pages apart from your policy page
-            cookieDomain: ""
+            cookieDomain: "cookiecuttr.com"
         };
-        var options = $.extend(defaults, options);
-        var message = defaults.cookieMessage.replace('{{cookiePolicyLink}}', defaults.cookiePolicyLink);
-        defaults.cookieMessage = 'We use cookies on this website, you can <a href="' + defaults.cookiePolicyLink + '" title="read about our cookies">read about them here</a>. To use the website as intended please...';
+        var options = $.extend(defaults, options); 
+		var listeFinalitées = options.cookieFinalitees.map(function(x){return defaults.cookieTexts[x]}).join(",");
+        var message = defaults.cookieGenMessage.replace('{{cookiePolicyLink}}', defaults.cookiePolicyLink).replace('{{cookieFinalitéesListe}}',listeFinalitées);
+        defaults.cookieMessage = "We use cookies on this website, you can <a id='learn_more' class='learn_more' href=\"' + defaults.cookiePolicyLink + '\" title=\"read about our cookies\">read about them here</a>. To use the website as intended please...";
         //convert options
+		var cookieButtonDecName = options.cookieButtonDecName;
+		var cookieFinalitees = options.cookieFinalitees;
         var cookiePolicyLinkIn = options.cookiePolicyLink;
         var cookieCutter = options.cookieCutter;
         var cookieCutterDeclineOnly = options.cookieCutterDeclineOnly;
         var cookieAnalytics = options.cookieAnalytics;
-        var cookieDeclineButton = options.cookieDeclineButton;
+        var cookieDeclineButtons = options.cookieDeclineButtons;
         var cookieAcceptButton = options.cookieAcceptButton;
-        var cookieResetButton = options.cookieResetButton;
+        var cookieResetButton = true;
         var cookieOverlayEnabled = options.cookieOverlayEnabled;
         var cookiePolicyLink = options.cookiePolicyLink;
         var cookieMessage = message;
@@ -79,7 +85,7 @@
         var cookiePolicyPage = options.cookiePolicyPage;
         var cookiePolicyPageMessage = options.cookiePolicyPageMessage;
         var cookieDiscreetLink = options.cookieDiscreetLink;
-        var cookieDiscreetReset = options.cookieDiscreetReset;
+        var cookieDiscreetReset = true;
         var cookieDiscreetLinkText = options.cookieDiscreetLinkText;
         var cookieDiscreetPosition = options.cookieDiscreetPosition;
         var cookieNoMessage = options.cookieNoMessage;
@@ -92,17 +98,28 @@
         $.cookieDeclined = function () {
             return $cookieDeclined;
         };
+	
         // write cookie accept button
-        if (cookieAcceptButton) {
-            var cookieAccept = ' <a href="#accept" class="cc-cookie-accept">' + cookieAcceptButtonText + '</a> ';
+        if (cookieButtons) {
+        	var cookieArray = [];
+        	for ( var i=0; i< cookieFinalitees.length; i++) {
+        		var finalite = cookieButtons[cookieFinalitees[i]];
+        		var status = finalite.status;
+        		if (jQuery.cookie('cc_cookie_decline_'+finalite) != "cc_cookie_decline_"+finalite)) status = 'decline';       		
+				cookieArray.push('<a href="#'+ cookieFinalitees[i] +'" class="cc-cookie-'+ status+'">' + finalite[status]+ '</a> ');
+			}
         } else {
-            var cookieAccept = "";
+            var cookieArray = [];
         }
+
         // write cookie decline button
-        if (cookieDeclineButton) {
-            var cookieDecline = ' <a href="#decline" class="cc-cookie-decline">' + cookieDeclineButtonText + '</a> ';
+        if (cookieDeclineButtons) {
+		    var cookieDecline = [];
+			for ( var i=0; i< cookieFinalitees.length; i++) {
+				cookieDecline.push('<a href="#'+ cookieFinalitees[i] +'" class="cc-cookie-decline">' + cookieButtonDecName[cookieFinalitees[i]]+ '</a> ');
+			}
         } else {
-            var cookieDecline = "";
+            var cookieDecline = [];
         }
         // write extra class for overlay
         if (cookieOverlayEnabled) {
@@ -179,9 +196,9 @@
                 }
             } else if (cookieAnalytics) { // show analytics overlay
                 if (appOrPre) {
-                    $('body').append('<div class="cc-cookies ' + cookieOverlay + '">' + cookieAnalyticsMessage + cookieAccept + cookieDecline + '<a href="' + cookieWhatAreTheyLink + '" title="Visit All about cookies (External link)">' + cookieWhatAreLinkText + '</a></div>');
+                    $('body').append('<div class="cc-cookies ' + cookieOverlay + '">' + cookieAnalyticsMessage + cookieButtons.join("") + '<a href="' + cookieWhatAreTheyLink + '" title="Visit All about cookies (External link)">' + cookieWhatAreLinkText + '</a></div>');
                 } else {
-                    $('body').prepend('<div class="cc-cookies ' + cookieOverlay + '">' + cookieAnalyticsMessage + cookieAccept + cookieDecline + '<a href="' + cookieWhatAreTheyLink + '" title="Visit All about cookies (External link)">' + cookieWhatAreLinkText + '</a></div>');
+                    $('body').prepend('<div class="cc-cookies ' + cookieOverlay + '">' + cookieAnalyticsMessage + cookieButtons.join("")  + '<a href="' + cookieWhatAreTheyLink + '" title="Visit All about cookies (External link)">' + cookieWhatAreLinkText + '</a></div>');
                 }
             }
             if (cookiePolicyPage) { // show policy page overlay
@@ -192,9 +209,9 @@
                 }
             } else if ((!cookieAnalytics) && (!cookieDiscreetLink)) { // show privacy policy option
                 if (appOrPre) {
-                    $('body').append('<div class="cc-cookies ' + cookieOverlay + '">' + cookieMessage + cookieAccept + cookieDecline + '</div>');
+                    $('body').append('<div class="cc-cookies ' + cookieOverlay + '">' + cookieMessage + cookieAccept + cookieButtons.join("")  + '</div>');
                 } else {
-                    $('body').prepend('<div class="cc-cookies ' + cookieOverlay + '">' + cookieMessage + cookieAccept + cookieDecline + '</div>');
+                    $('body').prepend('<div class="cc-cookies ' + cookieOverlay + '">' + cookieMessage + cookieAccept + cookieButtons.join("")  + '</div>');
                 }
             }
         }
@@ -213,62 +230,80 @@
             $('div.cc-cookies').css("top", "auto");
             $('div.cc-cookies').css("bottom", "0");
         }
+		// On vérifie qu'il ne s'agit pas d'un clique sur la banniére
+		$('a:not(.learn_more,.cc-cookie-decline,.cc-cookie-reset)').click(function(e) {
+			$.cookie("cc_cookie_accept", "cc_cookie_accept", {
+					expires: cookieExpires,
+					path: '/'
+			});
+		});		
         // setting the cookies
-
         // for top bar
-        $('.cc-cookie-accept, .cc-cookie-decline').click(function (e) {
+        $('.cc-cookie-decline').click(function (e) {
             e.preventDefault();
-            if ($(this).is('[href$=#decline]')) {
-                $.cookie("cc_cookie_accept", null, {
-                    path: '/'
-                });
-                $.cookie("cc_cookie_decline", "cc_cookie_decline", {
+            if ($(this).is('[href$=#social]')) {
+                $.cookie("cc_cookie_decline_social", "cc_cookie_decline_social", {
                     expires: cookieExpires,
                     path: '/'
-                });
-                if (options.cookieDomain) {
-                    // kill google analytics cookies
-                    $.cookie("__utma", null, {
-                        domain: '.' + options.cookieDomain,
-                        path: '/'
-                    });
-                    $.cookie("__utmb", null, {
-                        domain: '.' + options.cookieDomain,
-                        path: '/'
-                    });
-                    $.cookie("__utmc", null, {
-                        domain: '.' + options.cookieDomain,
-                        path: '/'
-                    });
-                    $.cookie("__utmz", null, {
-                        domain: '.' + options.cookieDomain,
-                        path: '/'
-                    });
-                }
-            } else {
-                $.cookie("cc_cookie_decline", null, {
-                    path: '/'
-                });
-                $.cookie("cc_cookie_accept", "cc_cookie_accept", {
+                });              
+            } 
+			if ($(this).is('[href$=#analytics]')) {
+                $.cookie("cc_cookie_decline_analytics", "cc_cookie_decline_analytics", {
                     expires: cookieExpires,
                     path: '/'
-                });
+                });              
             }
-            $(".cc-cookies").fadeOut(function () {
-                // reload page to activate cookies
-                location.reload();
-            });
+			if ($(this).is('[href$=#advertisement]')) {
+                $.cookie("cc_cookie_decline_advertisement", "cc_cookie_decline_advertisement", {
+                    expires: cookieExpires,
+                    path: '/'
+                });              
+            }
         });
+        $('.cc-cookie-accept').click(function (e) {
+            e.preventDefault();
+            if ($(this).is('[href$=#social]')) {
+                $.cookie("cc_cookie_decline_social", null, {
+                    expires: -1,
+                    path: '/'
+                });              
+            } 
+			if ($(this).is('[href$=#analytics]')) {
+                $.cookie("cc_cookie_decline_analytics", null, {
+                    expires: -1,
+                    path: '/'
+                });              
+            }
+			if ($(this).is('[href$=#advertisement]')) {
+                $.cookie("cc_cookie_decline_advertisement", null, {
+                    expires: -1,
+                    path: '/'
+                });              
+            }
+        });
+		function resetCookies() {
+			$.cookie("cc_cookie_accept", null, {
+				expires: -1,
+                path: '/'
+            });
+            $.cookie("cc_cookie_decline_analytics", null, {
+                expires: -1,
+				path: '/'
+            });
+			$.cookie("cc_cookie_decline_social", null, {
+                expires: -1,
+				path: '/'
+            });
+			$.cookie("cc_cookie_decline_advertisement", null, {
+                expires: -1,
+				path: '/'
+            });
+		}
         //reset cookies
         $('a.cc-cookie-reset').click(function (f) {
             f.preventDefault();
-            $.cookie("cc_cookie_accept", null, {
-                path: '/'
-            });
-            $.cookie("cc_cookie_decline", null, {
-                path: '/'
-            });
-            $(".cc-cookies").fadeOut(function () {
+			resetCookies();  
+			$(".cc-cookies").fadeOut(function () {
                 // reload page to activate cookies
                 location.reload();
             });
@@ -286,5 +321,6 @@
             // reload page to activate cookies
             location.reload();
         });
+		if( $(location).attr("href").indexOf(cookiePolicyLinkIn) >0 ) resetCookies();
     };
 })(jQuery);
